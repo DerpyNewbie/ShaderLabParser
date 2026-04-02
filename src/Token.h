@@ -3,6 +3,7 @@
 //
 #pragma once
 #include <cstdint>
+#include <sl_exports.h>
 
 namespace sl_parser
 {
@@ -37,7 +38,7 @@ namespace sl_parser
     };
 }
 
-inline std::string to_string(const sl_parser::TokenType type)
+SL_PARSER_EXPORTS inline std::string to_string(const sl_parser::TokenType type)
 {
     using namespace sl_parser;
     switch (type)

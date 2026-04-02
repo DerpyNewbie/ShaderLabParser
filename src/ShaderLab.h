@@ -7,6 +7,7 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include "sl_exports.h"
 
 #include "Command.h"
 
@@ -75,6 +76,12 @@ namespace sl_parser
 
     struct SubShader
     {
+        SubShader() = default;
+        SubShader(const SubShader&) = delete;
+        SubShader& operator=(const SubShader&) = delete;
+        SubShader(SubShader&&) noexcept = default;
+        SubShader& operator=(SubShader&&) noexcept = default;
+
         std::optional<int> lod;
         std::optional<Tags> tags;
         std::optional<Commands> commands;
@@ -116,6 +123,17 @@ namespace sl_parser
 
     struct ShaderLabObject
     {
+        ShaderLabObject() = default;
+
+        explicit ShaderLabObject(std::string name) : name(std::move(name))
+        {
+        }
+
+        ShaderLabObject(const ShaderLabObject&) = delete;
+        ShaderLabObject& operator=(const ShaderLabObject&) = delete;
+        ShaderLabObject(ShaderLabObject&&) noexcept = default;
+        ShaderLabObject& operator=(ShaderLabObject&&) noexcept = default;
+
         std::string name;
         std::optional<Properties> properties;
         SubShaders sub_shaders;
@@ -124,7 +142,7 @@ namespace sl_parser
     };
 }
 
-inline std::string to_string(const sl_parser::PassType e)
+SL_PARSER_EXPORTS inline std::string to_string(const sl_parser::PassType e)
 {
     switch (e)
     {

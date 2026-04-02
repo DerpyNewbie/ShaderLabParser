@@ -53,7 +53,7 @@ int main()
     std::cout << "properties: " << std::to_string(properties.size()) << std::endl;
     for (const auto& property : properties)
     {
-        std::cout << "  " << property.name << ", " << property.display_name << ", " << property.type << std::endl;
+        std::cout << "  " << property.name << ", " << property.display_name << ", " << property.type << ", " << property.default_value << std::endl;
     }
 
     std::cout << "sub shaders: " << std::to_string(shader_lab_object.sub_shaders.size()) << std::endl;

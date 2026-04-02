@@ -2,12 +2,14 @@
 // Created by derpy on 2026/02/12.
 //
 #pragma once
+#include "sl_exports.h"
 
-namespace sl_parser {
-    class Lexer {
+namespace sl_parser
+{
+    class Lexer
+    {
     public:
-        static std::vector<Token> Tokenize(std::string program);
-
-        static bool IsKeyword(const std::string &value);
+        SL_PARSER_EXPORTS static std::vector<Token> Tokenize(std::string program);
+        SL_PARSER_EXPORTS static bool IsKeyword(const std::string& value);
     };
 }

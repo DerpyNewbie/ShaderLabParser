@@ -4,8 +4,8 @@
 #pragma once
 
 #include <vector>
-#include <string>
 #include "Token.h"
+#include "sl_exports.h"
 
 namespace sl_parser
 {
@@ -16,18 +16,18 @@ namespace sl_parser
     class TokenHelper
     {
     public:
-        static TokensConstIterator FindToken(const Tokens& tokens, TokenType type, TokensConstIterator offset);
-        static TokensConstIterator FindToken(const Tokens& tokens, TokenType type);
-        static TokensConstIterator Next(TokensConstIterator it);
-        static TokensConstIterator NextType(TokensConstIterator it, TokenType type);
-        static TokensConstIterator NextTypeInBlock(TokensConstIterator it, TokenType type);
-        static TokensConstIterator SkipInBetween(TokensConstIterator it, TokenType begin, TokenType end);
-        static TokensConstIterator NextInBlock(TokensConstIterator it);
-        static bool IsIgnoredToken(const TokenType& token);
-        static bool IsEOF(const TokensConstIterator& it);
-        static bool IsOpening(const TokenType& token);
-        static bool IsClosing(const TokenType& token);
-        static void ExpectNonEOF(TokensConstIterator it);
-        static void ExpectType(TokensConstIterator it, TokenType type);
+        SL_PARSER_EXPORTS static TokensConstIterator FindToken(const Tokens& tokens, TokenType type, TokensConstIterator offset);
+        SL_PARSER_EXPORTS static TokensConstIterator FindToken(const Tokens& tokens, TokenType type);
+        SL_PARSER_EXPORTS static TokensConstIterator Next(TokensConstIterator it);
+        SL_PARSER_EXPORTS static TokensConstIterator NextType(TokensConstIterator it, TokenType type);
+        SL_PARSER_EXPORTS static TokensConstIterator NextTypeInBlock(TokensConstIterator it, TokenType type);
+        SL_PARSER_EXPORTS static TokensConstIterator SkipInBetween(TokensConstIterator it, TokenType begin, TokenType end);
+        SL_PARSER_EXPORTS static TokensConstIterator NextInBlock(TokensConstIterator it);
+        SL_PARSER_EXPORTS static bool IsIgnoredToken(const TokenType& token);
+        SL_PARSER_EXPORTS static bool IsEOF(const TokensConstIterator& it);
+        SL_PARSER_EXPORTS static bool IsOpening(const TokenType& token);
+        SL_PARSER_EXPORTS static bool IsClosing(const TokenType& token);
+        SL_PARSER_EXPORTS static void ExpectNonEOF(TokensConstIterator it);
+        SL_PARSER_EXPORTS static void ExpectType(TokensConstIterator it, TokenType type);
     };
 }

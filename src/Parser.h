@@ -5,6 +5,7 @@
 
 #include "ShaderLab.h"
 #include "TokenHelper.h"
+#include "sl_exports.h"
 
 namespace sl_parser
 {
@@ -21,6 +22,6 @@ namespace sl_parser
         static bool IsCommand(const std::string& value);
 
     public:
-        static ShaderLabObject Parse(const Tokens& tokens);
+        SL_PARSER_EXPORTS static ShaderLabObject Parse(const Tokens& tokens);
     };
 }
