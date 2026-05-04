@@ -1,0 +1,4 @@
+﻿shader-lab-parser provides CMake targets:
+
+find_package(shader_lab_parser CONFIG REQUIRED)
+target_link_libraries(main PRIVATE shader_lab_parser::shader_lab_parser)

@@ -1,0 +1,17 @@
+﻿{
+  "name": "shaderlabparser",
+  "version": "0.1.0",
+  "description": "ShaderLab syntax parser written in cpp.",
+  "homepage": "https://github.com/derpynewbie/ShaderLabParser",
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
+  ]
+}
