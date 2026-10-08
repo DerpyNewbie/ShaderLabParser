@@ -70,10 +70,10 @@ namespace sl_parser
         {
             if (IsIgnoredToken(next->type))
             {
-                return NextType(next, type);
+                return NextTypeInBlock(next, type);
             }
 
-            ExpectType(it, type);
+            ExpectType(next, type);
         }
 
         return next;
