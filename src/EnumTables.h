@@ -20,7 +20,10 @@ namespace sl_parser::tables
         E value;
     };
 
-    /// Case-insensitive name lookup.
+    /// <summary>Looks up a value by name, ignoring case.</summary>
+    /// <param name="table">Table to search.</param>
+    /// <param name="name">Name to find.</param>
+    /// <returns>The value, or empty if the name is not in the table.</returns>
     template <typename E>
     std::optional<E> Find(const std::span<const Entry<E>> table, const std::string_view name)
     {
@@ -31,7 +34,10 @@ namespace sl_parser::tables
         return std::nullopt;
     }
 
-    /// First name registered for a value.
+    /// <summary>Finds the first name registered for a value.</summary>
+    /// <param name="table">Table to search.</param>
+    /// <param name="value">Value to find.</param>
+    /// <returns>The name, or <c>?</c> if the value is not in the table.</returns>
     template <typename E>
     std::string_view NameOf(const std::span<const Entry<E>> table, const E value)
     {

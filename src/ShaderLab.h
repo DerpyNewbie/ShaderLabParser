@@ -17,7 +17,8 @@ namespace sl_parser
 {
     typedef std::vector<std::unique_ptr<Command>> Commands;
     typedef std::map<std::string, std::string> Tags;
-    /// Package name -> version restriction (empty when no version was given). `unity` restricts the editor version.
+    /// <summary>Maps a package name to its version restriction (empty when no version was given).</summary>
+    /// <remarks>The <c>unity</c> entry restricts the editor version.</remarks>
     typedef std::map<std::string, std::string> PackageRequirements;
 
     struct ShaderProgram
@@ -30,9 +31,9 @@ namespace sl_parser
         };
 
         Language language = Language::CG;
-        /// Verbatim source between the begin and END keywords.
+        /// <summary>Verbatim source between the begin and END keywords.</summary>
         std::string program;
-        /// Line of the begin keyword (CGPROGRAM, HLSLINCLUDE, ...).
+        /// <summary>Line of the begin keyword (<c>CGPROGRAM</c>, <c>HLSLINCLUDE</c>, ...).</summary>
         uint32_t line = 0;
     };
 
@@ -40,11 +41,11 @@ namespace sl_parser
 
     enum class PassType
     {
-        /// Pass definition
+        /// <summary>Pass definition.</summary>
         Definition,
-        /// Referencing to a Definition
+        /// <summary>Reference to a Definition in another shader.</summary>
         Use,
-        /// Copy screen contents into a texture
+        /// <summary>Copies the screen contents into a texture.</summary>
         Grab,
     };
 
@@ -84,7 +85,7 @@ namespace sl_parser
         std::optional<Tags> tags;
         std::optional<Commands> commands;
         std::optional<PackageRequirements> package_requirements;
-        /// CGINCLUDE / HLSLINCLUDE / GLSLINCLUDE blocks in this pass.
+        /// <summary><c>CGINCLUDE</c> / <c>HLSLINCLUDE</c> / <c>GLSLINCLUDE</c> blocks in this pass.</summary>
         ShaderPrograms includes;
         std::optional<ShaderProgram> shader_program;
 
@@ -106,12 +107,13 @@ namespace sl_parser
 
         std::optional<int> lod;
         std::optional<Tags> tags;
-        /// Render state for all passes. Commands inherited from an enclosing Category come first.
+        /// <summary>Render state for all passes.</summary>
+        /// <remarks>Commands inherited from an enclosing Category come first.</remarks>
         std::optional<Commands> commands;
         std::optional<PackageRequirements> package_requirements;
-        /// CGINCLUDE / HLSLINCLUDE / GLSLINCLUDE blocks in this sub shader (and its enclosing Category).
+        /// <summary><c>CGINCLUDE</c> / <c>HLSLINCLUDE</c> / <c>GLSLINCLUDE</c> blocks in this sub shader and its enclosing Category.</summary>
         ShaderPrograms includes;
-        /// Programs placed directly in the sub shader, i.e. surface shaders.
+        /// <summary>Programs placed directly in the sub shader, i.e. surface shaders.</summary>
         ShaderPrograms shader_programs;
         Passes passes;
     };
@@ -121,7 +123,8 @@ namespace sl_parser
     struct PropertyAttribute
     {
         std::string name;
-        /// Raw text inside the parentheses, e.g. `UnityEngine.Rendering.CullMode` for `[Enum(UnityEngine.Rendering.CullMode)]`.
+        /// <summary>Raw text inside the parentheses.</summary>
+        /// <remarks><c>UnityEngine.Rendering.CullMode</c> for <c>[Enum(UnityEngine.Rendering.CullMode)]</c>.</remarks>
         std::optional<std::string> arguments;
     };
 
@@ -141,21 +144,23 @@ namespace sl_parser
             Color,
             Vector,
             Range,
-            /// `Any` texture dimension.
+            /// <summary><c>Any</c> texture dimension.</summary>
             TextureAny,
         };
 
         std::optional<PropertyAttributes> attributes;
         std::string name;
         std::string display_name;
-        /// Type as written, e.g. `2D` or `Range(0,1)`.
+        /// <summary>Type as written, e.g. <c>2D</c> or <c>Range(0,1)</c>.</summary>
         std::string type;
         Type property_type = Type::Float;
-        /// Set for Range properties.
+        /// <summary>Minimum and maximum; set for Range properties.</summary>
         std::optional<std::pair<float, float>> range;
-        /// Default as written: the texture name for textures, `0.5` for numbers, `(1,1,1,1)` for vectors.
+        /// <summary>Default value as written.</summary>
+        /// <remarks>The texture name for textures, <c>0.5</c> for numbers, <c>(1,1,1,1)</c> for vectors.</remarks>
         std::string default_value;
-        /// Numeric default: one element for Float/Int/Range, the components for Color/Vector, empty for textures.
+        /// <summary>Numeric default value.</summary>
+        /// <remarks>One element for Float/Int/Range, the components for Color/Vector, empty for textures.</remarks>
         std::vector<float> default_numbers;
     };
 
@@ -176,15 +181,17 @@ namespace sl_parser
 
         std::string name;
         std::optional<Properties> properties;
-        /// Shader-level CGINCLUDE / HLSLINCLUDE / GLSLINCLUDE blocks.
+        /// <summary>Shader-level <c>CGINCLUDE</c> / <c>HLSLINCLUDE</c> / <c>GLSLINCLUDE</c> blocks.</summary>
         ShaderPrograms includes;
         SubShaders sub_shaders;
         std::optional<std::string> custom_editor;
-        /// Render pipeline asset type -> custom editor, from `CustomEditorForRenderPipeline "Editor" "Pipeline"`.
+        /// <summary>Maps a render pipeline asset type to its custom editor.</summary>
+        /// <remarks>From <c>CustomEditorForRenderPipeline "Editor" "Pipeline"</c>.</remarks>
         std::map<std::string, std::string> custom_editors_for_render_pipeline;
-        /// `Dependency "Name" = "Shader"` entries.
+        /// <summary><c>Dependency "Name" = "Shader"</c> entries.</summary>
         std::map<std::string, std::string> dependencies;
-        /// Empty when there is no Fallback or for `Fallback Off`.
+        /// <summary>Fallback shader name.</summary>
+        /// <remarks>Empty when there is no Fallback or for <c>Fallback Off</c>.</remarks>
         std::optional<std::string> fallback;
     };
 }

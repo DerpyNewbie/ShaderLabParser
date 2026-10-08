@@ -8,7 +8,8 @@
 
 namespace sl_parser
 {
-    /// Error raised by the Lexer and Parser. what() is formatted as "line L:C: message".
+    /// <summary>Error raised by the Lexer and Parser.</summary>
+    /// <remarks><c>what()</c> is formatted as <c>line L:C: message</c>.</remarks>
     struct ParseError : std::runtime_error
     {
         ParseError(const uint32_t line, const uint32_t column, const std::string& message)
@@ -18,11 +19,11 @@ namespace sl_parser
         {
         }
 
-        /// 1-based line number.
+        /// <summary>1-based line number.</summary>
         uint32_t line;
-        /// 1-based column number.
+        /// <summary>1-based column number.</summary>
         uint32_t column;
-        /// Message without the location prefix.
+        /// <summary>Message without the location prefix.</summary>
         std::string message;
     };
 }

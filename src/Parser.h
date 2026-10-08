@@ -14,10 +14,13 @@ namespace sl_parser
 {
     struct ParseResult
     {
-        /// Everything that could be parsed. Items that failed are left out.
+        /// <summary>Everything that could be parsed.</summary>
+        /// <remarks>Items that failed to parse are left out.</remarks>
         ShaderLabObject shader;
         std::vector<ParseError> errors;
 
+        /// <summary>Checks whether parsing finished without errors.</summary>
+        /// <returns><c>true</c> if <c>errors</c> is empty.</returns>
         [[nodiscard]] bool Succeeded() const
         {
             return errors.empty();
@@ -27,11 +30,20 @@ namespace sl_parser
     class Parser
     {
     public:
-        /// Parses tokens from Lexer::Tokenize. Throws ParseError on the first error.
+        /// <summary>Parses tokens, stopping at the first error.</summary>
+        /// <param name="tokens">Tokens from <see cref="Lexer::Tokenize"/>.</param>
+        /// <returns>The parsed shader.</returns>
+        /// <exception cref="ParseError">The tokens are not valid ShaderLab.</exception>
         SL_PARSER_EXPORTS static ShaderLabObject Parse(const Tokens& tokens);
-        /// Parses tokens, recovering from errors where possible. Never throws ParseError.
+        /// <summary>Parses tokens, recovering from errors where possible.</summary>
+        /// <remarks>Never throws <see cref="ParseError"/>; errors are collected in the result.</remarks>
+        /// <param name="tokens">Tokens from <see cref="Lexer::Tokenize"/>.</param>
+        /// <returns>Everything that could be parsed and every error found.</returns>
         SL_PARSER_EXPORTS static ParseResult TryParse(const Tokens& tokens);
-        /// Tokenizes and parses source text. Throws ParseError on the first error.
+        /// <summary>Tokenizes and parses source text, stopping at the first error.</summary>
+        /// <param name="source">ShaderLab source text.</param>
+        /// <returns>The parsed shader.</returns>
+        /// <exception cref="ParseError">The source is not valid ShaderLab.</exception>
         SL_PARSER_EXPORTS static ShaderLabObject ParseSource(const std::string& source);
     };
 }

@@ -27,7 +27,7 @@ namespace sl_parser
         kStringLiteral,
         kComment,
         kPreprocessor,
-        /// Verbatim source between a program/include keyword (CGPROGRAM, HLSLINCLUDE, ...) and its END keyword.
+        /// <summary>Verbatim source between a program/include keyword (<c>CGPROGRAM</c>, <c>HLSLINCLUDE</c>, ...) and its END keyword.</summary>
         kProgram,
         kEndOfFile,
     };
@@ -36,13 +36,14 @@ namespace sl_parser
     {
         TokenType type;
         std::string value;
-        /// 1-based line number.
+        /// <summary>1-based line number.</summary>
         uint32_t line;
-        /// 0-based column (in bytes) within the line.
+        /// <summary>0-based column (in bytes) within the line.</summary>
         uint32_t pos;
-        /// Byte offset of the token in the source.
+        /// <summary>Byte offset of the token in the source.</summary>
         uint32_t offset = 0;
-        /// Length of the token in the source, in bytes (includes quotes for string literals).
+        /// <summary>Length of the token in the source, in bytes.</summary>
+        /// <remarks>Includes the quotes for string literals.</remarks>
         uint32_t length = 0;
     };
 }

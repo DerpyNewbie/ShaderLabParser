@@ -93,7 +93,9 @@ namespace
         return Parser::ParseSource(source);
     }
 
-    /// Wraps sub shader body text in a minimal shader.
+    /// <summary>Parses sub shader body text wrapped in a minimal shader.</summary>
+    /// <param name="body">Text placed inside <c>SubShader { }</c>.</param>
+    /// <returns>The parsed shader.</returns>
     ShaderLabObject ParseSubShaderBody(const std::string& body)
     {
         return Parse("Shader \"T\" {\nSubShader {\n" + body + "\n}\n}");

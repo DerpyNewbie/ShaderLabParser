@@ -11,8 +11,11 @@
 
 namespace sl_parser
 {
-    /// A command argument that is either a literal or a reference to a material property, e.g. `Cull [_CullMode]`.
-    /// When `property` is set, `value` holds a default-constructed placeholder.
+    /// <summary>
+    /// A command argument that is either a literal or a reference to a material property, e.g. <c>Cull [_CullMode]</c>.
+    /// </summary>
+    /// <remarks>When <c>property</c> is set, <c>value</c> holds a default-constructed placeholder.</remarks>
+    /// <typeparam name="T">Type of the literal value.</typeparam>
     template <typename T>
     struct Value
     {
@@ -25,6 +28,9 @@ namespace sl_parser
         {
         }
 
+        /// <summary>Creates a value that refers to a material property.</summary>
+        /// <param name="name">Property name without brackets, e.g. <c>_CullMode</c>.</param>
+        /// <returns>A value whose <c>property</c> is set.</returns>
         static Value FromProperty(std::string name)
         {
             Value result;
@@ -32,6 +38,8 @@ namespace sl_parser
             return result;
         }
 
+        /// <summary>Checks whether this value refers to a material property.</summary>
+        /// <returns><c>true</c> if <c>property</c> is set.</returns>
         [[nodiscard]] bool IsProperty() const
         {
             return property.has_value();
@@ -62,7 +70,11 @@ namespace sl_parser
     struct Command
     {
         virtual ~Command() = default;
+        /// <summary>Gets the kind of this command.</summary>
+        /// <returns>The command type, which tells which derived struct this is.</returns>
         [[nodiscard]] virtual CommandType GetCommandType() const = 0;
+        /// <summary>Creates a deep copy of this command.</summary>
+        /// <returns>A new command of the same derived type.</returns>
         [[nodiscard]] virtual std::unique_ptr<Command> Clone() const = 0;
     };
 
@@ -110,14 +122,14 @@ namespace sl_parser
             SrcAlphaSaturate,
         };
 
-        /// Render target index (0-7). Empty means all render targets.
+        /// <summary>Render target index (0-7). Empty means all render targets.</summary>
         std::optional<uint8_t> target;
-        /// false for `Blend Off`.
+        /// <summary><c>false</c> for <c>Blend Off</c>.</summary>
         bool state = false;
         Value<Factor> src_factor = Factor::One;
         Value<Factor> dst_factor = Factor::Zero;
-        /// true when the alpha factors were given explicitly (`Blend A B, C D`).
-        /// Otherwise they are equal to the color factors.
+        /// <summary><c>true</c> when the alpha factors were given explicitly (<c>Blend A B, C D</c>).</summary>
+        /// <remarks>Otherwise the alpha factors are equal to the color factors.</remarks>
         bool separate_alpha = false;
         Value<Factor> alpha_src_factor = Factor::One;
         Value<Factor> alpha_dst_factor = Factor::Zero;
@@ -165,16 +177,16 @@ namespace sl_parser
             HSLLuminosity,
         };
 
-        /// Render target index (0-7). Empty means all render targets.
+        /// <summary>Render target index (0-7). Empty means all render targets.</summary>
         std::optional<uint8_t> target;
         Value<Op> operation = Op::Add;
-        /// Set for `BlendOp colorOp, alphaOp`.
+        /// <summary>Set for <c>BlendOp colorOp, alphaOp</c>.</summary>
         std::optional<Value<Op>> alpha_operation;
     };
 
     struct ColorMask : CommandImpl<ColorMask, CommandType::ColorMask>
     {
-        /// Bit flags; any combination of R, G, B and A is valid.
+        /// <summary>Bit flags; any combination of R, G, B and A is valid.</summary>
         enum class Channels : uint8_t
         {
             Zero = 0,
@@ -186,7 +198,7 @@ namespace sl_parser
             RGBA = R | G | B | A,
         };
 
-        /// Render target index (0-7). Empty means all render targets.
+        /// <summary>Render target index (0-7). Empty means all render targets.</summary>
         std::optional<uint8_t> target;
         Value<Channels> channels = Channels::RGBA;
     };
@@ -304,7 +316,7 @@ namespace sl_parser
         Value<State> state = State::On;
     };
 
-    /// Legacy fixed-function fog block: `Fog { Mode Off }`, `Fog { Color (1,1,1,1) }`, ...
+    /// <summary>Legacy fixed-function fog block: <c>Fog { Mode Off }</c>, <c>Fog { Color (1,1,1,1) }</c>, ...</summary>
     struct Fog : CommandImpl<Fog, CommandType::Fog>
     {
         enum class Mode

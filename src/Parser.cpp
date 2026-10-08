@@ -52,7 +52,10 @@ namespace
         }
     }
 
-    /// Locale-independent float parsing. Returns false if text is not entirely a number.
+    /// <summary>Parses a float independently of the current locale.</summary>
+    /// <param name="text">Number text; an HLSL-style <c>f</c> suffix is allowed.</param>
+    /// <param name="out">Receives the value on success.</param>
+    /// <returns><c>false</c> if <paramref name="text"/> is not entirely a number.</returns>
     bool TryParseFloat(std::string text, float* out)
     {
         if (!text.empty() && (text.back() == 'f' || text.back() == 'F')) text.pop_back();
@@ -193,7 +196,11 @@ namespace
             Next();
         }
 
-        /// Source text of tokens [from, to), with single spaces where the source had whitespace.
+        /// <summary>Rebuilds the source text of a token range.</summary>
+        /// <remarks>Whitespace between tokens is collapsed to a single space.</remarks>
+        /// <param name="from">Index of the first token.</param>
+        /// <param name="to">Index one past the last token.</param>
+        /// <returns>The text of tokens [from, to).</returns>
         [[nodiscard]] std::string RawText(const size_t from, const size_t to) const
         {
             std::string result;
@@ -210,7 +217,7 @@ namespace
             return result;
         }
 
-        /// Skips a balanced { ... } block starting at the current '{'.
+        /// <summary>Skips a balanced <c>{ ... }</c> block starting at the current <c>{</c>.</summary>
         void SkipBlock()
         {
             Expect(TokenType::kBlockBegin, "'{'");
@@ -240,7 +247,11 @@ namespace
             }
         }
 
-        /// Parses block items until '}' or end of file. In TryParse mode an item that fails is recorded and skipped.
+        /// <summary>Parses block items until <c>}</c> or end of file.</summary>
+        /// <remarks>In TryParse mode, an item that fails is recorded and skipped.</remarks>
+        /// <param name="block">Block name used in error messages.</param>
+        /// <param name="parse_item">Parses one item at the current position.</param>
+        /// <param name="is_item_start">Optional check for where the next item starts after an error.</param>
         void ParseItems(const std::string_view block, const std::function<void()>& parse_item,
                         const std::function<bool(size_t, uint32_t)>& is_item_start = nullptr)
         {
@@ -265,7 +276,11 @@ namespace
             }
         }
 
-        /// Skips past the rest of a broken item: to the next item start or the '}' closing the enclosing block.
+        /// <summary>Skips past the rest of a broken item.</summary>
+        /// <remarks>Stops at the next item start or at the <c>}</c> closing the enclosing block.</remarks>
+        /// <param name="item_start">Index of the broken item's first token.</param>
+        /// <param name="error_line">Line of the error.</param>
+        /// <param name="is_item_start">Optional item start check; defaults to any keyword.</param>
         void Resync(const size_t item_start, const uint32_t error_line,
                     const std::function<bool(size_t, uint32_t)>& is_item_start)
         {
@@ -801,8 +816,9 @@ namespace
             return sub_shader;
         }
 
-        /// Category groups sub shaders and shares its render state, tags and includes with them.
-        /// They are copied into each sub shader; the sub shader's own values take precedence.
+        /// <summary>Parses a Category block, which groups sub shaders and shares its render state, tags and includes.</summary>
+        /// <remarks>The shared values are copied into each sub shader; the sub shader's own values take precedence.</remarks>
+        /// <param name="shader">Shader that receives the sub shaders.</param>
         void ParseCategory(ShaderLabObject& shader)
         {
             Next(); // Category

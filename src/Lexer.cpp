@@ -52,8 +52,10 @@ namespace
         "ENDGLSL",
     };
 
-    /// Returns the END keyword for a program/include keyword, or an empty view.
-    /// Program delimiters are matched case-sensitively, like Unity does.
+    /// <summary>Finds the END keyword for a program/include keyword.</summary>
+    /// <remarks>Program delimiters are matched case-sensitively, like Unity does.</remarks>
+    /// <param name="word">Word to check.</param>
+    /// <returns>The END keyword, or an empty view if <paramref name="word"/> does not begin a program.</returns>
     std::string_view ProgramEndKeyword(const std::string_view word)
     {
         if (word == "CGPROGRAM" || word == "CGINCLUDE") return "ENDCG";
@@ -79,7 +81,9 @@ namespace
         return std::isdigit(static_cast<unsigned char>(c)) != 0;
     }
 
-    /// True if text is a plain decimal number such as "1", "-0.5", ".5" or "1e-3".
+    /// <summary>Checks whether text is a plain decimal number such as <c>1</c>, <c>-0.5</c>, <c>.5</c> or <c>1e-3</c>.</summary>
+    /// <param name="text">Text to check.</param>
+    /// <returns><c>true</c> if the whole text is a number.</returns>
     bool IsNumber(const std::string_view text)
     {
         size_t i = 0;
@@ -149,7 +153,9 @@ namespace
             });
         }
 
-        /// Advances line bookkeeping over source_[from, to).
+        /// <summary>Advances line bookkeeping over <c>source_[from, to)</c>.</summary>
+        /// <param name="from">First offset.</param>
+        /// <param name="to">Offset one past the end.</param>
         void CountLines(const size_t from, const size_t to)
         {
             for (size_t k = from; k < to; ++k)
@@ -337,7 +343,10 @@ namespace
             Add(type, std::move(word), start, k);
         }
 
-        /// Captures everything up to the END keyword verbatim, so shader code is never tokenized as ShaderLab.
+        /// <summary>Captures everything up to the END keyword verbatim.</summary>
+        /// <remarks>This keeps shader code from being tokenized as ShaderLab.</remarks>
+        /// <param name="begin_keyword">Keyword that opened the block, for error messages.</param>
+        /// <param name="end_keyword">Keyword that closes the block.</param>
         void LexProgramBody(const std::string& begin_keyword, const std::string_view end_keyword)
         {
             const size_t body_start = i_;
