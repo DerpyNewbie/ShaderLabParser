@@ -3,7 +3,8 @@
 //
 #pragma once
 #include <cstdint>
-#include <sl_exports.h>
+#include <string>
+#include "sl_exports.h"
 
 namespace sl_parser
 {
@@ -26,6 +27,8 @@ namespace sl_parser
         kStringLiteral,
         kComment,
         kPreprocessor,
+        /// <summary>Verbatim source between a program/include keyword (<c>CGPROGRAM</c>, <c>HLSLINCLUDE</c>, ...) and its END keyword.</summary>
+        kProgram,
         kEndOfFile,
     };
 
@@ -33,8 +36,15 @@ namespace sl_parser
     {
         TokenType type;
         std::string value;
+        /// <summary>1-based line number.</summary>
         uint32_t line;
+        /// <summary>0-based column (in bytes) within the line.</summary>
         uint32_t pos;
+        /// <summary>Byte offset of the token in the source.</summary>
+        uint32_t offset = 0;
+        /// <summary>Length of the token in the source, in bytes.</summary>
+        /// <remarks>Includes the quotes for string literals.</remarks>
+        uint32_t length = 0;
     };
 }
 
@@ -60,6 +70,7 @@ SL_PARSER_EXPORTS inline std::string to_string(const sl_parser::TokenType type)
     case TokenType::kSemiColon: return "SemiColon";
     case TokenType::kComment: return "Comment";
     case TokenType::kPreprocessor: return "Preprocessor";
+    case TokenType::kProgram: return "Program";
     case TokenType::kEndOfFile: return "EndOfFile";
     default: return "Unknown";
     }

@@ -2,21 +2,53 @@
 // Created by derpy on 2026/02/13.
 //
 #pragma once
+#include <array>
+#include <cstdint>
+#include <memory>
+#include <optional>
 #include <string>
+#include <utility>
 
 namespace sl_parser
 {
-    enum class RenderTarget
+    /// <summary>
+    /// A command argument that is either a literal or a reference to a material property, e.g. <c>Cull [_CullMode]</c>.
+    /// </summary>
+    /// <remarks>When <c>property</c> is set, <c>value</c> holds a default-constructed placeholder.</remarks>
+    /// <typeparam name="T">Type of the literal value.</typeparam>
+    template <typename T>
+    struct Value
     {
-        None,
-        One,
-        Two,
-        Three,
-        Four,
-        Five,
-        Six,
-        Seven,
-        Eight,
+        T value{};
+        std::optional<std::string> property;
+
+        Value() = default;
+
+        Value(T v) : value(std::move(v)) // NOLINT(google-explicit-constructor)
+        {
+        }
+
+        /// <summary>Creates a value that refers to a material property.</summary>
+        /// <param name="name">Property name without brackets, e.g. <c>_CullMode</c>.</param>
+        /// <returns>A value whose <c>property</c> is set.</returns>
+        static Value FromProperty(std::string name)
+        {
+            Value result;
+            result.property = std::move(name);
+            return result;
+        }
+
+        /// <summary>Checks whether this value refers to a material property.</summary>
+        /// <returns><c>true</c> if <c>property</c> is set.</returns>
+        [[nodiscard]] bool IsProperty() const
+        {
+            return property.has_value();
+        }
+
+        operator const T&() const // NOLINT(google-explicit-constructor)
+        {
+            return value;
+        }
     };
 
     enum class CommandType
@@ -32,15 +64,37 @@ namespace sl_parser
         ZClip,
         ZTest,
         ZWrite,
+        Fog,
     };
 
     struct Command
     {
         virtual ~Command() = default;
-        virtual CommandType GetCommandType() = 0;
+        /// <summary>Gets the kind of this command.</summary>
+        /// <returns>The command type, which tells which derived struct this is.</returns>
+        [[nodiscard]] virtual CommandType GetCommandType() const = 0;
+        /// <summary>Creates a deep copy of this command.</summary>
+        /// <returns>A new command of the same derived type.</returns>
+        [[nodiscard]] virtual std::unique_ptr<Command> Clone() const = 0;
     };
 
-    struct AlphaToMask : Command
+    template <typename Derived, CommandType Type>
+    struct CommandImpl : Command
+    {
+        static constexpr CommandType kType = Type;
+
+        [[nodiscard]] CommandType GetCommandType() const override
+        {
+            return Type;
+        }
+
+        [[nodiscard]] std::unique_ptr<Command> Clone() const override
+        {
+            return std::make_unique<Derived>(static_cast<const Derived&>(*this));
+        }
+    };
+
+    struct AlphaToMask : CommandImpl<AlphaToMask, CommandType::AlphaToMask>
     {
         enum class State
         {
@@ -48,15 +102,10 @@ namespace sl_parser
             On,
         };
 
-        State state = State::Off;
-
-        CommandType GetCommandType() override
-        {
-            return CommandType::AlphaToMask;
-        };
+        Value<State> state = State::Off;
     };
 
-    struct Blend : Command
+    struct Blend : CommandImpl<Blend, CommandType::Blend>
     {
         enum class Factor
         {
@@ -70,22 +119,23 @@ namespace sl_parser
             OneMinusSrcAlpha,
             OneMinusDstColor,
             OneMinusDstAlpha,
+            SrcAlphaSaturate,
         };
 
-        RenderTarget target = RenderTarget::None;
+        /// <summary>Render target index (0-7). Empty means all render targets.</summary>
+        std::optional<uint8_t> target;
+        /// <summary><c>false</c> for <c>Blend Off</c>.</summary>
         bool state = false;
-        Factor src_factor = Factor::One;
-        Factor dst_factor = Factor::One;
-        Factor alpha_src_factor = Factor::One;
-        Factor alpha_dst_factor = Factor::One;
-
-        CommandType GetCommandType() override
-        {
-            return CommandType::Blend;
-        };
+        Value<Factor> src_factor = Factor::One;
+        Value<Factor> dst_factor = Factor::Zero;
+        /// <summary><c>true</c> when the alpha factors were given explicitly (<c>Blend A B, C D</c>).</summary>
+        /// <remarks>Otherwise the alpha factors are equal to the color factors.</remarks>
+        bool separate_alpha = false;
+        Value<Factor> alpha_src_factor = Factor::One;
+        Value<Factor> alpha_dst_factor = Factor::Zero;
     };
 
-    struct BlendOp : Command
+    struct BlendOp : CommandImpl<BlendOp, CommandType::BlendOp>
     {
         enum class Op
         {
@@ -127,16 +177,16 @@ namespace sl_parser
             HSLLuminosity,
         };
 
-        Op operation;
-
-        CommandType GetCommandType() override
-        {
-            return CommandType::BlendOp;
-        };
+        /// <summary>Render target index (0-7). Empty means all render targets.</summary>
+        std::optional<uint8_t> target;
+        Value<Op> operation = Op::Add;
+        /// <summary>Set for <c>BlendOp colorOp, alphaOp</c>.</summary>
+        std::optional<Value<Op>> alpha_operation;
     };
 
-    struct ColorMask : Command
+    struct ColorMask : CommandImpl<ColorMask, CommandType::ColorMask>
     {
+        /// <summary>Bit flags; any combination of R, G, B and A is valid.</summary>
         enum class Channels : uint8_t
         {
             Zero = 0,
@@ -148,16 +198,12 @@ namespace sl_parser
             RGBA = R | G | B | A,
         };
 
-        RenderTarget target;
-        Channels channels;
-
-        CommandType GetCommandType() override
-        {
-            return CommandType::ColorMask;
-        };
+        /// <summary>Render target index (0-7). Empty means all render targets.</summary>
+        std::optional<uint8_t> target;
+        Value<Channels> channels = Channels::RGBA;
     };
 
-    struct Conservative : Command
+    struct Conservative : CommandImpl<Conservative, CommandType::Conservative>
     {
         enum class Enabled
         {
@@ -165,15 +211,10 @@ namespace sl_parser
             True,
         };
 
-        Enabled enabled = Enabled::False;
-
-        CommandType GetCommandType() override
-        {
-            return CommandType::Conservative;
-        };
+        Value<Enabled> enabled = Enabled::False;
     };
 
-    struct Cull : Command
+    struct Cull : CommandImpl<Cull, CommandType::Cull>
     {
         enum class State
         {
@@ -182,26 +223,16 @@ namespace sl_parser
             Front,
         };
 
-        State state = State::Back;
-
-        CommandType GetCommandType() override
-        {
-            return CommandType::Cull;
-        };
+        Value<State> state = State::Back;
     };
 
-    struct Offset : Command
+    struct Offset : CommandImpl<Offset, CommandType::Offset>
     {
-        float factor;
-        float units;
-
-        CommandType GetCommandType() override
-        {
-            return CommandType::Offset;
-        };
+        Value<float> factor = 0.0f;
+        Value<float> units = 0.0f;
     };
 
-    struct Stencil : Command
+    struct Stencil : CommandImpl<Stencil, CommandType::Stencil>
     {
         enum class Comparison
         {
@@ -227,30 +258,25 @@ namespace sl_parser
             DecrWrap,
         };
 
-        char ref = 0;
-        char read_mask = static_cast<char>(0xFF);
-        char write_mask = static_cast<char>(0xFF);
+        Value<uint8_t> ref = static_cast<uint8_t>(0);
+        Value<uint8_t> read_mask = static_cast<uint8_t>(0xFF);
+        Value<uint8_t> write_mask = static_cast<uint8_t>(0xFF);
 
-        Comparison comparison_operation = Comparison::Always;
-        Operation pass_operation = Operation::Keep;
-        Operation fail_operation = Operation::Keep;
-        Operation z_fail_operation = Operation::Keep;
-        Comparison comparison_operation_back = Comparison::Always;
-        Operation pass_operation_back = Operation::Keep;
-        Operation fail_operation_back = Operation::Keep;
-        Operation z_fail_operation_back = Operation::Keep;
-        Comparison comparison_operation_front = Comparison::Always;
-        Operation pass_operation_front = Operation::Keep;
-        Operation fail_operation_front = Operation::Keep;
-        Operation z_fail_operation_front = Operation::Keep;
-
-        CommandType GetCommandType() override
-        {
-            return CommandType::Stencil;
-        };
+        Value<Comparison> comparison_operation = Comparison::Always;
+        Value<Operation> pass_operation = Operation::Keep;
+        Value<Operation> fail_operation = Operation::Keep;
+        Value<Operation> z_fail_operation = Operation::Keep;
+        Value<Comparison> comparison_operation_back = Comparison::Always;
+        Value<Operation> pass_operation_back = Operation::Keep;
+        Value<Operation> fail_operation_back = Operation::Keep;
+        Value<Operation> z_fail_operation_back = Operation::Keep;
+        Value<Comparison> comparison_operation_front = Comparison::Always;
+        Value<Operation> pass_operation_front = Operation::Keep;
+        Value<Operation> fail_operation_front = Operation::Keep;
+        Value<Operation> z_fail_operation_front = Operation::Keep;
     };
 
-    struct ZClip : Command
+    struct ZClip : CommandImpl<ZClip, CommandType::ZClip>
     {
         enum class Enabled
         {
@@ -258,15 +284,10 @@ namespace sl_parser
             True,
         };
 
-        Enabled enabled = Enabled::True;
-
-        CommandType GetCommandType() override
-        {
-            return CommandType::ZClip;
-        };
+        Value<Enabled> enabled = Enabled::True;
     };
 
-    struct ZTest : Command
+    struct ZTest : CommandImpl<ZTest, CommandType::ZTest>
     {
         enum class Operation
         {
@@ -281,15 +302,10 @@ namespace sl_parser
             Always,
         };
 
-        Operation operation = Operation::LEqual;
-
-        CommandType GetCommandType() override
-        {
-            return CommandType::ZTest;
-        };
+        Value<Operation> operation = Operation::LEqual;
     };
 
-    struct ZWrite : Command
+    struct ZWrite : CommandImpl<ZWrite, CommandType::ZWrite>
     {
         enum class State
         {
@@ -297,11 +313,24 @@ namespace sl_parser
             On,
         };
 
-        State state = State::On;
+        Value<State> state = State::On;
+    };
 
-        CommandType GetCommandType() override
+    /// <summary>Legacy fixed-function fog block: <c>Fog { Mode Off }</c>, <c>Fog { Color (1,1,1,1) }</c>, ...</summary>
+    struct Fog : CommandImpl<Fog, CommandType::Fog>
+    {
+        enum class Mode
         {
-            return CommandType::ZWrite;
+            Off,
+            Global,
+            Linear,
+            Exp,
+            Exp2,
         };
+
+        std::optional<Value<Mode>> mode;
+        std::optional<Value<std::array<float, 4>>> color;
+        std::optional<Value<float>> density;
+        std::optional<std::pair<Value<float>, Value<float>>> range;
     };
 }
