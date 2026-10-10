@@ -82,6 +82,7 @@ namespace
     }
 
     /// <summary>Checks whether text is a plain decimal number such as <c>1</c>, <c>-0.5</c>, <c>.5</c> or <c>1e-3</c>.</summary>
+    /// <remarks>An HLSL-style <c>f</c> suffix is allowed.</remarks>
     /// <param name="text">Text to check.</param>
     /// <returns><c>true</c> if the whole text is a number.</returns>
     bool IsNumber(const std::string_view text)

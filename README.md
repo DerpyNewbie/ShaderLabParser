@@ -38,7 +38,8 @@ target_link_libraries(main PRIVATE shader_lab_parser::shader_lab_parser)
   Arguments can be material property references, e.g. `Cull [_CullMode]` (see `sl_parser::Value<T>`).
 - `CGPROGRAM` / `HLSLPROGRAM` / `GLSLPROGRAM` and the matching `*INCLUDE` blocks at Shader, SubShader and Pass
   level. Program source is kept verbatim.
-- Keywords and values are case-insensitive, as in Unity. Tabs, CRLF line endings and a UTF-8 BOM are handled.
+- Keywords and values are case-insensitive, as in Unity, except program delimiters such as `CGPROGRAM` and `ENDCG`,
+  which are case-sensitive (also as in Unity). Tabs, CRLF line endings and a UTF-8 BOM are handled.
 
 Not supported: legacy fixed-function commands (`Lighting`, `Material`, `SetTexture`, `AlphaTest`, ...). They are
 reported as errors.
